@@ -1,4 +1,6 @@
 
+
+
 const ready = async (songID) => {
 	// Start download
 	const downloading = fetch(`a/${songID}`);
@@ -8,6 +10,8 @@ const ready = async (songID) => {
 	await context.audioWorklet.addModule('processor.js');
 	const node = new AudioWorkletNode(context, 'processor');
 	await node.connect(context.destination);
+
+	console.log(context.sampleRate);
 
 	// Decode file to an AudioBuffer interface
 	const response = await downloading;
@@ -23,17 +27,20 @@ const ready = async (songID) => {
 	}
 
 	// Start listening to rendering thread for confirmation
-	workletNode.port.onmessage = (event) => {
-		event.data === 'READY' ? return true : console.log(event);
-	};
+	node.port.onmessage = (event) => {
+		event.data === 'READY' ?
+			console.log(event.data) :
+			console.log(event);
+	}
 
 	// Transfer array buffers to rendering thread
-	await workletNode.port.postMessage(
+	await node.port.postMessage(
 		{type: 'load', data: arrayList},
 		arrayList.map(arr => arr.buffer)
 	);
 
 }
 
+ready('01.flac');
 
 

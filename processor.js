@@ -4,7 +4,7 @@ class processor extends AudioWorkletProcessor {
 		this.port.onmessage = (event) => {
 			switch (event.data.type) {
 				case 'load':
-					this.pcm = event.data.data;
+					this.srcPCM = event.data.data;
 					this.port.postMessage('READY');
 				case 'play':
 					// Fade in
@@ -14,23 +14,22 @@ class processor extends AudioWorkletProcessor {
 					// Toggle A/B
 			}
 		}
+		this.loopMap = [
+			[0, 0, 128],
+			[1, 0, 128]
+		];
 	}
 	process(outputs) {
-		const {sig,pcm,currentFrame:i} = this;
-		switch (sig) {
-			case 0:
+		const {srcPCM, loopMap, currentFrame: srcIndex, controlVar: X} = this;
 
-			case 1:
-
-			case 2:
-
-			case 3:
-
+		let I;
+		for (let [channel, i, length] of loopMap) {
+			for (I = srcIndex; i < length; i++) {
+				srcPCM[channel][I] += srcPCM[channel+2][I]
+			}
 		}
-		
-		for (let value of outputs[0][0]) {
-			value +=
-		}
+
 	}
 }
 
+registerProcessor('processor', processor);
